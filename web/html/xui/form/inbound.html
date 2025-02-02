@@ -98,6 +98,11 @@
     {{template "form/http"}}
 </template>
 
+<!-- http -->
+<template v-if="inbound.protocol === Protocols.CISCO">
+    {{template "form/Cisco"}}
+</template>
+
 <!-- wireguard -->
 <template v-if="inbound.protocol === Protocols.WIREGUARD">
     {{template "form/wireguard"}}
