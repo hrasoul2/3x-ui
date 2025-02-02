@@ -1240,6 +1240,7 @@
             getClientId(protocol, client) {
                 switch (protocol) {
                     case Protocols.TROJAN: return client.password;
+		    case Protocols.CISCO: return client.password;
                     case Protocols.SHADOWSOCKS: return client.email;
                     default: return client.id;
                 }
