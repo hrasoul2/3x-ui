@@ -3,6 +3,7 @@
     <a-form-item label='{{ i18n "pages.inbounds.enable" }}'>
         <a-switch v-model="client.enable"></a-switch>
     </a-form-item>
+
     <a-form-item v-if="isEdit && app.subSettings.enable && isGroup">
         <template slot="label">
             <a-tooltip>
@@ -15,6 +16,7 @@
         </template>
         <a-switch v-model="isGroupEdit"></a-switch>
     </a-form-item>
+
     <a-form-item>
         <template slot="label">
             <a-tooltip>
@@ -27,6 +29,22 @@
         </template>
         <a-input v-model.trim="client.email"></a-input>
     </a-form-item>
+
+    <!-- فیلد "Password" برای پروتکل Cisco -->
+    <a-form-item v-if="inbound.protocol === Protocols.CISCO">
+        <template slot="label">
+            <a-tooltip>
+                <template slot="title">
+                    <span>{{ i18n "reset" }}</span>
+                </template>
+                {{ i18n "password" }}
+                <a-icon @click="client.password = RandomUtil.randomSeq(10)" type="sync"> </a-icon>
+            </a-tooltip>
+        </template>
+        <a-input v-model.trim="client.password"></a-input>
+    </a-form-item>
+
+    <!-- فیلد "Password" برای پروتکل Shadowsocks -->
     <a-form-item v-if="inbound.protocol === Protocols.TROJAN || inbound.protocol === Protocols.SHADOWSOCKS">
         <template slot="label">
             <a-tooltip>
@@ -40,6 +58,8 @@
         </template>
         <a-input v-model.trim="client.password"></a-input>
     </a-form-item>
+
+    <!-- فیلد "ID" برای پروتکل VMess یا VLESS -->
     <a-form-item v-if="inbound.protocol === Protocols.VMESS || inbound.protocol === Protocols.VLESS">
         <template slot="label">
             <a-tooltip>
@@ -51,11 +71,13 @@
         </template>
         <a-input v-model.trim="client.id"></a-input>
     </a-form-item>
+
     <a-form-item v-if="inbound.protocol === Protocols.VMESS" label='{{ i18n "security" }}'>
         <a-select v-model="client.security" :dropdown-class-name="themeSwitcher.currentTheme">
             <a-select-option v-for="key in USERS_SECURITY" :value="key">[[ key ]]</a-select-option>
         </a-select>
     </a-form-item>
+
     <a-form-item v-if="client.email && app.subSettings.enable">
         <template slot="label">
             <a-tooltip>
@@ -68,6 +90,7 @@
         </template>
         <a-input v-model.trim="client.subId"></a-input>
     </a-form-item>
+
     <a-form-item v-if="client.email && app.tgBotEnable">
         <template slot="label">
             <a-tooltip>
@@ -80,9 +103,11 @@
         </template>
         <a-input-number style="width: 50%" v-model.number="client.tgId" min="0"></a-input-number>
     </a-form-item>
+
     <a-form-item v-if="client.email" label='{{ i18n "comment" }}'>
         <a-input v-model.trim="client.comment"></a-input>
     </a-form-item>
+
     <a-form-item v-if="app.ipLimitEnable">
         <template slot="label">
             <a-tooltip>
@@ -95,6 +120,7 @@
         </template>
         <a-input-number v-model.number="client.limitIp" min="0"></a-input-number>
     </a-form-item>
+
     <a-form-item v-if="app.ipLimitEnable && client.limitIp > 0 && client.email && isEdit">
         <template slot="label">
             <a-tooltip>
@@ -119,12 +145,14 @@
             </a-textarea>
         </a-form>
     </a-form-item>
+
     <a-form-item v-if="inbound.canEnableTlsFlow()" label='Flow'>
         <a-select v-model="client.flow" :dropdown-class-name="themeSwitcher.currentTheme">
             <a-select-option value="" selected>{{ i18n "none" }}</a-select-option>
             <a-select-option v-for="key in TLS_FLOW_CONTROL" :value="key">[[ key ]]</a-select-option>
         </a-select>
     </a-form-item>
+
     <a-form-item>
         <template slot="label">
             <a-tooltip>
@@ -137,6 +165,7 @@
         </template>
         <a-input-number v-model.number="client._totalGB" :min="0"></a-input-number>
     </a-form-item>
+
     <a-form-item v-if="isEdit && clientStats" label='{{ i18n "usage" }}'>
         <a-tag :color="clientUsageColor(clientStats, app.trafficDiff)">
             [[ sizeFormat(clientStats.up) ]] /
@@ -150,12 +179,15 @@
                 v-if="client.email.length > 0"></a-icon>
         </a-tooltip>
     </a-form-item>
+
     <a-form-item label='{{ i18n "pages.client.delayedStart" }}'>
         <a-switch v-model="delayedStart" @click="client._expiryTime=0"></a-switch>
     </a-form-item>
+
     <a-form-item v-if="delayedStart" label='{{ i18n "pages.client.expireDays" }}'>
         <a-input-number v-model.number="delayedExpireDays" :min="0"></a-input-number>
     </a-form-item>
+
     <a-form-item v-else>
         <template slot="label">
             <a-tooltip>
@@ -170,6 +202,7 @@
                             value="client._expiryTime" v-model="client._expiryTime"></persian-datepicker>
         <a-tag color="red" v-if="isEdit && isExpiry">Expired</a-tag>
     </a-form-item>
+
     <a-form-item v-if="client.expiryTime != 0">
         <template slot="label">
             <a-tooltip>
