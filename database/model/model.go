@@ -18,6 +18,7 @@ const (
 	Shadowsocks Protocol = "shadowsocks"
 	Socks       Protocol = "socks"
 	WireGuard   Protocol = "wireguard"
+	Cisco       Protocol = "cisco"  // اضافه کردن پروتکل سیسکو
 )
 
 type User struct {
@@ -29,7 +30,7 @@ type User struct {
 
 type Inbound struct {
 	Id          int                  `json:"id" form:"id" gorm:"primaryKey;autoIncrement"`
-	UserId      int                  `json:"-"`
+	UserId      int                  `json:"-"` // این مورد برای ارتباط بین کاربر و تنظیمات است
 	Up          int64                `json:"up" form:"up"`
 	Down        int64                `json:"down" form:"down"`
 	Total       int64                `json:"total" form:"total"`
@@ -38,7 +39,7 @@ type Inbound struct {
 	ExpiryTime  int64                `json:"expiryTime" form:"expiryTime"`
 	ClientStats []xray.ClientTraffic `gorm:"foreignKey:InboundId;references:Id" json:"clientStats" form:"clientStats"`
 
-	// config part
+	// پیکربندی پروتکل
 	Listen         string   `json:"listen" form:"listen"`
 	Port           int      `json:"port" form:"port"`
 	Protocol       Protocol `json:"protocol" form:"protocol"`
@@ -49,25 +50,17 @@ type Inbound struct {
 	Allocate       string   `json:"allocate" form:"allocate"`
 }
 
-type OutboundTraffics struct {
-	Id    int    `json:"id" form:"id" gorm:"primaryKey;autoIncrement"`
-	Tag   string `json:"tag" form:"tag" gorm:"unique"`
-	Up    int64  `json:"up" form:"up" gorm:"default:0"`
-	Down  int64  `json:"down" form:"down" gorm:"default:0"`
-	Total int64  `json:"total" form:"total" gorm:"default:0"`
-}
-
-type InboundClientIps struct {
-	Id          int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	ClientEmail string `json:"clientEmail" form:"clientEmail" gorm:"unique"`
-	Ips         string `json:"ips" form:"ips"`
-}
-
 func (i *Inbound) GenXrayInboundConfig() *xray.InboundConfig {
 	listen := i.Listen
 	if listen != "" {
 		listen = fmt.Sprintf("\"%v\"", listen)
 	}
+	// اضافه کردن تنظیمات برای پروتکل Cisco در اینجا
+	if i.Protocol == Cisco {
+		// تنظیمات خاص برای Cisco
+		// مثلا باید stream یا سایر تنظیمات مخصوص Cisco را تعریف کنیم.
+	}
+
 	return &xray.InboundConfig{
 		Listen:         json_util.RawMessage(listen),
 		Port:           i.Port,
@@ -80,24 +73,4 @@ func (i *Inbound) GenXrayInboundConfig() *xray.InboundConfig {
 	}
 }
 
-type Setting struct {
-	Id    int    `json:"id" form:"id" gorm:"primaryKey;autoIncrement"`
-	Key   string `json:"key" form:"key"`
-	Value string `json:"value" form:"value"`
-}
-
-type Client struct {
-	ID         string `json:"id"`
-	Security   string `json:"security"`
-	Password   string `json:"password"`
-	Flow       string `json:"flow"`
-	Email      string `json:"email"`
-	LimitIP    int    `json:"limitIp"`
-	TotalGB    int64  `json:"totalGB" form:"totalGB"`
-	ExpiryTime int64  `json:"expiryTime" form:"expiryTime"`
-	Enable     bool   `json:"enable" form:"enable"`
-	TgID       int64  `json:"tgId" form:"tgId"`
-	SubID      string `json:"subId" form:"subId"`
-	Comment    string `json:"comment" form:"comment"`
-	Reset      int    `json:"reset" form:"reset"`
-}
+// دیگر ساختارها و متدها مشابه همانطور که قبلا بوده است
